@@ -7,14 +7,17 @@ using Microsoft.DirectX;
 using Microsoft.DirectX.Direct3D;
 using System.Drawing;
 using System.Threading;
+using System.Collections;
 
 namespace Engine
 {
     public class MainEngine
     {
         private Device device = null;
+        private InputDevices input = null;
         private Control renderWindow = null;
         public Thread renderThread = null;
+        private Thread processDevices = null;
 
         private PresentParameters presentParams = new PresentParameters();
         private Color bgColor = Color.Black;
@@ -36,8 +39,9 @@ namespace Engine
 
         public void InitializeInput()
         {
-            InputDevices input = new InputDevices(renderWindow);
-
+            input = new InputDevices(renderWindow);
+            processDevices = new Thread(input.Processing);
+            processDevices.Start();
         }
 
         public void DeInitializeGraphics()
@@ -48,7 +52,8 @@ namespace Engine
 
         public void DeInitializeInput()
         {
-
+            input = null;
+            processDevices.Abort();
         }
 
         private void Render()
